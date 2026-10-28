@@ -1,0 +1,91 @@
+version: v0.0.2
+started: 2026-10-27T00:16:44-03:00
+note: prompt already published, running evaluation only
+
+==================================================
+AVALIAÇÃO DE PROMPTS OTIMIZADOS
+==================================================
+
+Provider: openai
+Modelo Principal: gpt-4.1
+Modelo de Avaliação: gpt-4.1
+
+Criando dataset de avaliação: mba-ia-pull-evaluation-prompt-eval...
+   ✓ Carregados 15 exemplos do arquivo datasets/bug_to_user_story.jsonl
+   ✓ Dataset 'mba-ia-pull-evaluation-prompt-eval' já existe, usando existente
+   ✓ https://smith.langchain.com/o/0b843629-5385-40f1-8e0a-2520a43321e4/datasets/29502649-e6b0-4d1b-b96c-8df9721c2a0e
+
+======================================================================
+PROMPTS PARA AVALIAR
+======================================================================
+
+Este script irá puxar prompts do LangSmith Hub.
+Certifique-se de ter feito push dos prompts antes de avaliar:
+  python src/push_prompts.py
+
+
+🔍 Avaliando: dieg657/bug_to_user_story_v2
+   Puxando prompt do LangSmith Hub: dieg657/bug_to_user_story_v2
+   ✓ Prompt carregado com sucesso
+   Rodando experimento no LangSmith...
+View the evaluation results for experiment: 'dieg657-bug_to_user_story_v2-cf1425a0' at:
+https://smith.langchain.com/o/0b843629-5385-40f1-8e0a-2520a43321e4/datasets/29502649-e6b0-4d1b-b96c-8df9721c2a0e/compare?selectedSessions=27d274d4-e009-49ee-bbe0-111e4dc8b132
+
+
+      [1] F1:0.33 Clarity:0.30 Precision:0.30
+      [2] F1:0.46 Clarity:0.40 Precision:0.33
+      [3] F1:0.33 Clarity:0.35 Precision:0.70
+      [4] F1:0.20 Clarity:0.45 Precision:0.60
+      [5] F1:0.29 Clarity:0.40 Precision:0.50
+      [6] F1:0.24 Clarity:0.35 Precision:0.33
+      [7] F1:0.29 Clarity:0.40 Precision:0.50
+      [8] F1:0.20 Clarity:0.40 Precision:0.33
+      [9] F1:0.24 Clarity:0.50 Precision:0.50
+      [10] F1:0.18 Clarity:0.40 Precision:0.60
+      [11] F1:0.51 Clarity:0.50 Precision:0.67
+      [12] F1:0.33 Clarity:0.50 Precision:0.67
+      [13] F1:0.44 Clarity:0.55 Precision:0.60
+      [14] F1:0.29 Clarity:0.60 Precision:0.60
+      [15] F1:0.29 Clarity:0.50 Precision:0.50
+
+==================================================
+Prompt: dieg657/bug_to_user_story_v2
+==================================================
+
+Métricas Derivadas:
+  - Helpfulness: 0.48 ✗
+  - Correctness: 0.41 ✗
+
+Métricas Base:
+  - F1-Score: 0.31 ✗
+  - Clarity: 0.44 ✗
+  - Precision: 0.52 ✗
+
+--------------------------------------------------
+📊 MÉDIA GERAL: 0.4306
+--------------------------------------------------
+
+❌ STATUS: REPROVADO
+⚠️  Métricas abaixo de 0.8: helpfulness, correctness, f1_score, clarity, precision
+⚠️  Média atual: 0.4306 | Necessário: 0.8000
+
+==================================================
+RESUMO FINAL
+==================================================
+
+Prompts avaliados: 1
+Aprovados: 0
+Reprovados: 1
+
+Resultados no LangSmith (notas gravadas como feedback no experimento):
+  dieg657/bug_to_user_story_v2
+    https://smith.langchain.com/o/0b843629-5385-40f1-8e0a-2520a43321e4/datasets/29502649-e6b0-4d1b-b96c-8df9721c2a0e/compare?selectedSessions=27d274d4-e009-49ee-bbe0-111e4dc8b132
+
+⚠️  Alguns prompts não atingiram todas as métricas >= 0.8
+
+Próximos passos:
+1. Refatore os prompts com score baixo
+2. Faça push novamente: python src/push_prompts.py
+3. Execute: python src/evaluate.py novamente
+eval_exit: 1
+finished: 2026-10-27T00:17:55-03:00
