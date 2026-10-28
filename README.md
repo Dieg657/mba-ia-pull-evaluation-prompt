@@ -1,5 +1,137 @@
 # Pull, Otimização e Avaliação de Prompts com LangChain e LangSmith
 
+## Técnicas Aplicadas
+
+No prompt final, `prompts/bug_to_user_story_v2.yml`, eu usei três técnicas.
+
+**Few-shot Learning.** O enunciado pede exemplos claros de entrada e saída. Eu coloquei três pares de relato e user story (simples, médio e complexo). O modelo copia o formato, e a última linha pede para não copiar o conteúdo quando o relato for outro.
+
+**Role prompting.** O texto abre dizendo que quem responde é um Product Manager sênior. A persona puxa a resposta para o formato de user story, com quem sofre o problema, o que essa pessoa quer fazer e qual o benefício.
+
+**Skeleton of Thought.** A resposta segue um esqueleto, e o esqueleto muda de acordo com o tamanho do bug. Bug simples fica na user story e nos critérios. Bug médio ganha contexto técnico, tem mais profundidade. Bug complexo separa os problemas, o impacto e as tasks. A escolha do esqueleto fica dentro do prompt, e não aparece na resposta, invisível ao usuário.
+
+As cinco versões abaixo mostram como eu fui chegando nisso. O texto de cada uma está como eu escrevi na hora.
+
+### O que eu fiz em cada versão
+
+Segue relato da minha evolução do prompt a cada versão que eu iterei.
+
+#### v0.0.1
+
+Na primeira eu usei duas técnicas. Role prompting, e few-shot. A persona foi um estagiário no primeiro dia. Os dois exemplos são claros: tem o relato e embaixo a frase que ele deve devolver. Só que essa frase que coloquei é curta e objetiva. Rodei e reprovou em tudo. A média ficou em 0,51. A pior nota foi o F1, 0,37, porque a frase não cobre a user story esperada. Clareza deu 0,51 e Precisão 0,62.
+
+#### v0.0.2
+
+Na segunda eu continuei com few-shot e role prompting. Dois exemplos claros, com o relato e a user story. Coloquei a saída de cada exemplo  seguindo o raciocínio: "como um usuário, eu quero que isso funcione, para que o sistema volte ao normal", não especifiquei um critério de aceitação. Rodei e reprovou de novo, mais baixo que a primeira. Acredito que não ter colocado o critério de aceite foi determinante pra rebaixar baixar a nota em relação a primeira versão do prompt. A média ficou em 0,43. O F1 foi 0,31, Clareza 0,44 e Precisão 0,52.
+
+#### v0.0.3
+
+Na terceira eu usei três técnicas. Few-shot com dois exemplos claros, role prompting de Product Manager, e um esqueleto de pensamento simples: a frase "como um, eu quero, para que" e uns critérios em frases curtas. Nessa iteração eu permiti que o modelo completasse o que faltasse no relato. Rodei e melhorou bastante. A média foi pra 0,74. A Precisão passou, 0,81. O resto ficou perto, mas abaixo de 0,8: Helpfulness e Correctness em 0,75, F1 e Clareza em 0,69. Continua reprovado, só que agora já tenho uma base melhor, e já consigo ver um possível caminho de solução.
+
+#### v0.0.4
+
+Na quarta eu mantive as três técnicas anteriores e apertei um pouco mais o esqueleto de pensamento. Os dois exemplos agora foram construídos utilizando linguagem natural Gherkin utilizado muito por desenvolvimento orientado a comportamento (BDD) no formato "dado que, quando, então". Explicitei que resposta tem que ser só a user story. Nesta versão não coloquei como guardrail a regra de não inventar detalhe, nem o exemplo de bug complicado. Rodei e ficou muito perto da objetivo que a gente queria. A média teve como valor 0,79. Correctness teve 0,80 e o F1 com o valor de 0,81. Helpfulness ficou em 0,77, Clareza em 0,75, e a Precisão chegou perto de 0,80, se arrendodassemos pra cima daria o valor, mas na conta bruta ainda ficou devendo e performou um pouco abaixo.
+
+#### v0.0.5
+
+Na quinta eu continuei utilizando as mesmas três técnicas, só que agora coloquei um guardrail pra não inventar/pressupor coisa que o relato não havia deixado explicito. Rodei e nessa rodada agora todos os valores ficaram acima de 0,80. A média deles ficou em 0,84. Helpfulness 0,84, Correctness 0,85, F1 0,82, Clareza 0,81 e Precisão 0,88.
+
+## Resultados Finais
+
+O prompt que vale é `prompts/bug_to_user_story_v2.yml` (versão v0.0.5). O push, a avaliação e os testes leem só esse arquivo. As versões anteriores ficam no LangSmith, recuperáveis pelas tags de cada publicação. Os logs de cada rodada estão em `docs/iterations/`.
+
+| Versão | Helpfulness | Correctness | F1-Score | Clarity | Precision | Média | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| v0.0.1 | 0.56 | 0.49 | 0.37 | 0.51 | 0.62 | 0.5109 | Reprovado. Todas abaixo de 0.8 |
+| v0.0.2 | 0.48 | 0.41 | 0.31 | 0.44 | 0.52 | 0.4306 | Reprovado. Todas abaixo de 0.8 |
+| v0.0.3 | 0.75 | 0.75 | 0.69 | 0.69 | 0.81 | 0.7392 | Reprovado. Só a Precision passou |
+| v0.0.4 | 0.77 | 0.80 | 0.81 | 0.75 | 0.80 | 0.7867 | Reprovado. Correctness e F1 passaram. Precision ficou um fio abaixo de 0.8 |
+| v0.0.5 | 0.84 | 0.85 | 0.82 | 0.81 | 0.88 | 0.8404 | Aprovado. Todas >= 0.8 |
+
+Experimentos no LangSmith:
+
+- v0.0.1: https://smith.langchain.com/o/0b843629-5385-40f1-8e0a-2520a43321e4/datasets/29502649-e6b0-4d1b-b96c-8df9721c2a0e/compare?selectedSessions=2806001b-ccb8-4041-829c-34db28a778bd
+- v0.0.2: https://smith.langchain.com/o/0b843629-5385-40f1-8e0a-2520a43321e4/datasets/29502649-e6b0-4d1b-b96c-8df9721c2a0e/compare?selectedSessions=27d274d4-e009-49ee-bbe0-111e4dc8b132
+- v0.0.3: https://smith.langchain.com/o/0b843629-5385-40f1-8e0a-2520a43321e4/datasets/29502649-e6b0-4d1b-b96c-8df9721c2a0e/compare?selectedSessions=30dc613e-026f-42d6-a240-c238d9eb6131
+- v0.0.4: https://smith.langchain.com/o/0b843629-5385-40f1-8e0a-2520a43321e4/datasets/29502649-e6b0-4d1b-b96c-8df9721c2a0e/compare?selectedSessions=633e6241-f70b-4362-9ad6-5b6f53dc73fc
+- v0.0.5: https://smith.langchain.com/o/0b843629-5385-40f1-8e0a-2520a43321e4/datasets/29502649-e6b0-4d1b-b96c-8df9721c2a0e/compare?selectedSessions=852c7566-e211-43fa-bac8-17f913a14a42
+
+Os prints estão em `docs/evidencias/`.
+
+Dataset com os 15 exemplos:
+
+![Dataset com 15 exemplos](docs/evidencias/02-dataset-15-exemplos.webp)
+
+As cinco avaliações. A v0.0.5 é a da direita no gráfico e a linha #5 da tabela. Todas as métricas dela ficaram em 0,8 ou mais:
+
+![Notas dos cinco experimentos](docs/evidencias/01-experimentos-notas.webp)
+
+Notas da v0.0.5, exemplo por exemplo. No topo: clarity 0,81, correctness 0,85, f1 0,82, helpfulness 0,84 e precision 0,88:
+
+![Notas da v0.0.5 por exemplo](docs/evidencias/03-v005-notas-por-exemplo.webp)
+
+Tracing de três exemplos dessa mesma rodada:
+
+![Trace do exemplo 1](docs/evidencias/04-trace-exemplo-1.webp)
+
+![Trace do exemplo 2](docs/evidencias/05-trace-exemplo-2.webp)
+
+![Trace do exemplo 3](docs/evidencias/06-trace-exemplo-3.webp)
+
+### Comparação entre o v1 e o v2
+
+O `prompts/bug_to_user_story_v1.yml` chama o modelo de assistente, mistura o relato dentro do system prompt e pede uma user story sem dizer o formato. Não tem exemplo, critério nem regra.
+
+O v2 separa os papéis: a instrução fica no system prompt e o relato fica só no user prompt, na variável `{bug_report}`. A persona é um Product Manager sênior. Tem regras para não inventar dado que o relato não trouxe, três esqueletos conforme a complexidade do bug e três exemplos de entrada e saída. Na avaliação, a v0.0.5 passou em todas as métricas, com média 0,84.
+
+## Como Executar
+
+### Pré-requisitos
+
+- Python 3.10+
+- Conta no LangSmith, com handle público e `LANGSMITH_API_KEY`
+- Chave da OpenAI ou do Gemini, conforme o `LLM_PROVIDER` do `.env`
+- Dependências de `requirements.txt`
+
+Copie `.env.example` para `.env` e preencha as chaves, o handle (`USERNAME_LANGSMITH_HUB`), o projeto e os modelos (`LLM_MODEL` e `EVAL_MODEL`).
+
+### Ambiente
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # No Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### Comandos
+
+1. Pull do prompt inicial
+
+```bash
+python src/pull_prompts.py
+```
+
+2. O prompt otimizado já está em `prompts/bug_to_user_story_v2.yml`. O push lê esse arquivo.
+
+```bash
+python src/push_prompts.py
+```
+
+3. Avaliação. O script puxa `{seu_handle}/bug_to_user_story_v2` do hub.
+
+```bash
+python src/evaluate.py
+```
+
+4. Testes do prompt
+
+```bash
+pytest tests/test_prompts.py
+```
+
+<details>
+<summary>Instruções originais do desafio</summary>
+
 ## Objetivo
 
 Você deve entregar um software capaz de:
@@ -352,3 +484,5 @@ Rode uma vez e guarde o endereço: ao compartilhar de novo, o link muda.
 - Não altere os datasets de avaliação - apenas os prompts em prompts/bug_to_user_story_v2.yml
 - Itere, itere, itere - é normal precisar de 3-5 iterações para atingir 0.8 em todas as métricas
 - Documente seu processo - a jornada de otimização é tão importante quanto o resultado final
+
+</details>
